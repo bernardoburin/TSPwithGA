@@ -86,19 +86,41 @@ public final class Rota implements Comparable<Rota> {
     private static void preencherOX(int[] filho, int[] doador, int inicio) {
         int n = filho.length;
         int idx = (inicio + 1) % n;
-        for (int k = 1; k < n; k++) {
-            int gene = doador[(inicio + k) % n];
-            if (gene == 0) continue; // mantém origem fixa
-            if (!contem(filho, gene)) {
-                while (filho[idx] != -1) idx = (idx + 1) % n;
-                filho[idx] = gene;
+
+        // marca os genes já usados no filho
+        Set<Integer> usados = new HashSet<>();
+        for (int g : filho) {
+            if (g != -1) {
+                usados.add(g);
             }
         }
-        for (int i = 1; i < n; i++) if (filho[i] == -1) filho[i] = doador[i];
-    }
 
-    private static boolean contem(int[] arr, int v) {
-        for (int x : arr) if (x == v) return true; return false;
+        for (int k = 1; k < n; k++) {
+            int gene = doador[(inicio + k) % n];
+            if (gene == 0) {
+                continue; // mantém origem fixa
+            }
+            if (!usados.contains(gene)) {
+                while (filho[idx] != -1) {
+                    idx = (idx + 1) % n;
+                }
+                filho[idx] = gene;
+                usados.add(gene);
+            }
+        }
+
+        // preenche eventuais buracos restantes com genes não usados
+        for (int i = 1; i < n; i++) {
+            if (filho[i] == -1) {
+                for (int g : doador) {
+                    if (!usados.contains(g)) {
+                        filho[i] = g;
+                        usados.add(g);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /** Mutação: swap e inversão de segmento. */
